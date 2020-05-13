@@ -1,0 +1,78 @@
+export type InjectionToken<T = any> = Constructor<T> | string | symbol;
+
+export type FactoryFunction<T> = (
+  container: DependencyContainerInterface,
+  token: InjectionToken<T>
+) => T;
+
+export interface AbstractFactoryInterface<T = any> {
+  canCreate: (
+    container: DependencyContainerInterface,
+    token: InjectionToken<T>
+  ) => boolean;
+  factory: FactoryFunction<T>;
+}
+
+/** Constructor type */
+export type Constructor<T> = new (...args: any[]) => T;
+
+export interface Dictionary<T> {
+  [key: string]: T;
+}
+
+export interface Provider<T = any> {
+  factory: FactoryFunction<T>;
+  singleton: boolean;
+  instance?: T;
+}
+
+export interface DependencyContainerInterface {
+  register<T>(
+    token: InjectionToken<T>,
+    provider: Provider
+  ): DependencyContainerInterface;
+
+  registerSingleton<T>(
+    from: InjectionToken<T>,
+    to: Constructor<T>
+  ): DependencyContainerInterface;
+  registerSingleton<T>(from: Constructor<T>): DependencyContainerInterface;
+  registerSingleton<T>(
+    from: InjectionToken<T>,
+    to?: Constructor<T>
+  ): DependencyContainerInterface;
+
+  registerInstance<T>(
+    token: InjectionToken<T>,
+    instance: T
+  ): DependencyContainerInterface;
+
+  get<T>(token: InjectionToken<T>): T;
+
+  has<T>(token: InjectionToken<T>): boolean;
+
+  reset(): void;
+
+  createChildContainer(): DependencyContainerInterface;
+
+  pipe<T>(middleware: ServiceMiddleware<T>): void;
+}
+
+export type ServiceMiddleware<T> = (
+  container: DependencyContainerInterface,
+  token: InjectionToken<T>,
+  next: () => T
+) => T;
+
+export type ServiceMiddlewares = {
+  [key in string | symbol]: Array<ServiceMiddleware<any>>;
+};
+
+export interface DependencyConfigInterface {
+  services?: Map<InjectionToken, any>;
+  invokables?: Array<Constructor<any>>;
+  singletonFactories?: Map<InjectionToken, FactoryFunction<any>>;
+  transientFactories?: Map<InjectionToken, FactoryFunction<any>>;
+  abstractFactories?: Array<[AbstractFactoryInterface, boolean]>;
+  activationMiddlewares?: Map<InjectionToken, Array<ServiceMiddleware<any>>>;
+}
