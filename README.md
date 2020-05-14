@@ -1,5 +1,10 @@
 # Dependency-container
 
+[![Build Status](https://travis-ci.org/Moln/dependency-container.svg?branch=master)](https://travis-ci.org/Moln/dependency-container) 
+[![Coverage Status](https://coveralls.io/repos/github/Moln/dependency-container/badge.svg?branch=master)](https://coveralls.io/github/Moln/dependency-container?branch=master)
+[![GitHub license](https://img.shields.io/github/license/Moln/dependency-container)](https://github.com/Moln/dependency-container)
+[![npm](https://img.shields.io/npm/v/@moln/dependency-container.svg)](https://www.npmjs.com/@moln/dependency-container)
+
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
