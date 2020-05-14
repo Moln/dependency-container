@@ -3,6 +3,19 @@
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
+- [Installation](#installation)
+- [API](#api)
+  - [Decorators](#decorators)
+    - [injection()](#injection)
+    - [inject()](#inject)
+  - [DependencyContainer](#dependencycontainer)
+    - [Injection Token](#injection-token)
+    - [Provider](#provider)
+    - [Registers](#registers)
+    - [Factories](#factories)
+  - [Middleware](#Middleware)
+    - [matchmiddleware](#matchmiddleware)
+
 ## Installation
 
 Install by `npm`
