@@ -3,11 +3,7 @@ import DependencyContainer, {
   ReflectionBasedAbstractFactory,
   reflectionFactory,
 } from '../src';
-import {
-  FactoryFunction,
-  InjectionToken,
-  ServiceMiddleware,
-} from '../src/types';
+import { FactoryFunction, InjectionToken, ServiceMiddleware } from '../src';
 import { Bar, Foo, RandomValue } from './classes';
 
 describe('DependencyContainerInterface', () => {

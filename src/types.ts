@@ -1,6 +1,13 @@
 import { Lifecycle } from './DependencyContainer';
+import { Constructor } from './internal-types';
 
 export type InjectionToken<T = any> = Constructor<T> | string | symbol;
+
+export interface Provider<T = any> {
+  factory: FactoryFunction<T>;
+  lifecycle: Lifecycle;
+  instance?: T;
+}
 
 export type FactoryFunction<T> = (
   container: DependencyContainerInterface,
@@ -13,19 +20,6 @@ export interface AbstractFactoryInterface<T = any> {
     token: InjectionToken<T>
   ) => boolean;
   factory: FactoryFunction<T>;
-}
-
-/** Constructor type */
-export type Constructor<T> = new (...args: any[]) => T;
-
-export interface Dictionary<T> {
-  [key: string]: T;
-}
-
-export interface Provider<T = any> {
-  factory: FactoryFunction<T>;
-  lifecycle: Lifecycle;
-  instance?: T;
 }
 
 export interface DependencyContainerInterface {

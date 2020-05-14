@@ -1,5 +1,6 @@
-import { Constructor, InjectionToken } from './types';
+import { InjectionToken } from './types';
 import { Lifecycle } from './DependencyContainer';
+import { Constructor } from './internal-types';
 
 export const METADATA = {
   DESIGN_PARAM_TYPES: 'design:paramtypes',

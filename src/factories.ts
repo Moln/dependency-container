@@ -1,13 +1,12 @@
 import {
   DependencyContainerInterface,
-  Constructor,
   FactoryFunction,
   InjectionToken,
-  Dictionary,
   AbstractFactoryInterface,
 } from './types';
 import { isNormalToken, METADATA } from './';
 import { Lifecycle } from 'DependencyContainer';
+import { Constructor, Dictionary } from 'internal-types';
 
 export function aliasFactory<T>(token: InjectionToken<T>): FactoryFunction<T> {
   return container => container.get(token);

@@ -1,5 +1,4 @@
 import {
-  Constructor,
   InjectionToken,
   Provider,
   ServiceMiddleware,
@@ -10,6 +9,7 @@ import {
 } from './types';
 import { matchMiddleware } from './';
 import { isNormalToken, reflectionFactory, reflectionFactoryFrom } from './';
+import { Constructor } from 'internal-types';
 
 const noop = () => {
   /* noop */
