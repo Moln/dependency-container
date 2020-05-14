@@ -1,13 +1,10 @@
 import { InjectionToken } from './types';
 import { Lifecycle } from './DependencyContainer';
-import { Constructor } from './internal-types';
-
-export const METADATA = {
-  DESIGN_PARAM_TYPES: 'design:paramtypes',
-  PARAM_TYPES: 'dependency:paramtypes',
-  LIFECYCLE: 'dependency:lifecycle',
-};
-
+import {
+  METADATA_LIFECYCLE,
+  METADATA_PARAM_TYPES,
+  Constructor,
+} from './internal';
 /**
  * Class decorator factory that registers the class as a singleton
  *
@@ -25,7 +22,7 @@ export function injection<T>(
   }
 
   return (target: Constructor<T>) => {
-    Reflect.defineMetadata(METADATA.LIFECYCLE, lifecycle, target);
+    Reflect.defineMetadata(METADATA_LIFECYCLE, lifecycle, target);
   };
 }
 
@@ -45,8 +42,8 @@ export function inject(token: InjectionToken<any>): ParameterDecorator {
 
   return (target, propertyKey, parameterIndex): void => {
     const injectionTokens =
-      Reflect.getOwnMetadata(METADATA.PARAM_TYPES, target) || {};
+      Reflect.getOwnMetadata(METADATA_PARAM_TYPES, target) || {};
     injectionTokens[parameterIndex] = token;
-    Reflect.defineMetadata(METADATA.PARAM_TYPES, injectionTokens, target);
+    Reflect.defineMetadata(METADATA_PARAM_TYPES, injectionTokens, target);
   };
 }

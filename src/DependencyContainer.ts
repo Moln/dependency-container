@@ -9,7 +9,7 @@ import {
 } from './types';
 import { matchMiddleware } from './';
 import { isNormalToken, reflectionFactory, reflectionFactoryFrom } from './';
-import { Constructor } from 'internal-types';
+import { Constructor } from 'internal';
 
 const noop = () => {
   /* noop */
@@ -19,6 +19,9 @@ export enum Lifecycle {
   SINGLETON,
   TRANSIENT,
 }
+
+const SINGLETON = Lifecycle.SINGLETON;
+const TRANSIENT = Lifecycle.TRANSIENT;
 
 export default class DependencyContainer
   implements DependencyContainerInterface {
@@ -47,7 +50,7 @@ export default class DependencyContainer
       config.singletonFactories.forEach((value, token) => {
         this.register(token, {
           factory: value,
-          lifecycle: Lifecycle.SINGLETON,
+          lifecycle: SINGLETON,
         });
       });
     }
@@ -56,7 +59,7 @@ export default class DependencyContainer
       config.transientFactories.forEach((value, token) => {
         this.register(token, {
           factory: value,
-          lifecycle: Lifecycle.TRANSIENT,
+          lifecycle: TRANSIENT,
         });
       });
     }
@@ -92,7 +95,7 @@ export default class DependencyContainer
     if (typeof provider == 'function') {
       provider = {
         factory: provider,
-        lifecycle: Lifecycle.SINGLETON,
+        lifecycle: SINGLETON,
       };
     }
 
@@ -107,7 +110,7 @@ export default class DependencyContainer
   ): DependencyContainerInterface {
     return this.register(token, {
       factory: noop,
-      lifecycle: Lifecycle.SINGLETON,
+      lifecycle: SINGLETON,
       instance,
     });
   }
@@ -127,7 +130,7 @@ export default class DependencyContainer
       if (to) {
         return this.register<T>(from, {
           factory: reflectionFactoryFrom(to),
-          lifecycle: Lifecycle.SINGLETON,
+          lifecycle: SINGLETON,
         });
       } else {
         throw new Error('Invalid argument "to"');
@@ -136,7 +139,7 @@ export default class DependencyContainer
 
     return this.register(from, {
       factory: reflectionFactory,
-      lifecycle: Lifecycle.SINGLETON,
+      lifecycle: SINGLETON,
     });
   }
 
@@ -176,7 +179,7 @@ export default class DependencyContainer
       return this.get(token);
     }
 
-    if (provider.lifecycle === Lifecycle.SINGLETON && provider.instance) {
+    if (provider.lifecycle === SINGLETON && provider.instance) {
       return provider.instance;
     }
 
@@ -189,7 +192,7 @@ export default class DependencyContainer
 
     const result = call();
 
-    if (provider.lifecycle === Lifecycle.SINGLETON) {
+    if (provider.lifecycle === SINGLETON) {
       provider.instance = result;
     }
 

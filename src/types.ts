@@ -1,5 +1,5 @@
 import { Lifecycle } from './DependencyContainer';
-import { Constructor } from './internal-types';
+import { Constructor } from './internal';
 
 export type InjectionToken<T = any> = Constructor<T> | string | symbol;
 

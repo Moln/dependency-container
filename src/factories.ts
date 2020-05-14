@@ -4,9 +4,9 @@ import {
   InjectionToken,
   AbstractFactoryInterface,
 } from './types';
-import { isNormalToken, METADATA } from './';
+import { isNormalToken } from './';
+import { METADATA_LIFECYCLE, getParamInfo, Constructor } from './internal';
 import { Lifecycle } from 'DependencyContainer';
-import { Constructor, Dictionary } from 'internal-types';
 
 export function aliasFactory<T>(token: InjectionToken<T>): FactoryFunction<T> {
   return container => container.get(token);
@@ -42,18 +42,6 @@ export function reflectionFactoryFrom<T>(
     reflectionFactory(container, ctor);
 }
 
-export function getParamInfo(target: Constructor<any>): any[] {
-  const params: any[] =
-    Reflect.getMetadata(METADATA.DESIGN_PARAM_TYPES, target) || [];
-  const injectionTokens: Dictionary<InjectionToken<any>> =
-    Reflect.getOwnMetadata(METADATA.PARAM_TYPES, target) || {};
-  Object.keys(injectionTokens).forEach(key => {
-    params[+key] = injectionTokens[key];
-  });
-
-  return params;
-}
-
 export class ReflectionBasedAbstractFactory<T = any>
   implements AbstractFactoryInterface<T> {
   private readonly lifecycleScope: Lifecycle | undefined;
@@ -74,7 +62,7 @@ export class ReflectionBasedAbstractFactory<T = any>
       return true;
     } else {
       return (
-        Reflect.getOwnMetadata(METADATA.LIFECYCLE, token) ===
+        Reflect.getOwnMetadata(METADATA_LIFECYCLE, token) ===
         this.lifecycleScope
       );
     }
