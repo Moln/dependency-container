@@ -1,20 +1,15 @@
 import DependencyContainer, {
   Lifecycle,
   inject,
-  injection,
+  injectable,
   ReflectionBasedAbstractFactory,
+  createContainer,
 } from '../src';
 import { Bar, Baz, Foo, RandomValue } from './classes';
 
 describe('Decorators', () => {
-  it('Test @injection singleton', () => {
-    const di = new DependencyContainer();
-
-    di.configure({
-      abstractFactories: [
-        [new ReflectionBasedAbstractFactory(), Lifecycle.SINGLETON],
-      ],
-    });
+  it('Test @injectable singleton', () => {
+    const di = createContainer();
 
     const obj = di.get(Foo);
 
@@ -22,17 +17,11 @@ describe('Decorators', () => {
   });
 
   it('Test @inject', () => {
-    const di = new DependencyContainer();
+    const di = createContainer();
 
     const bar = new Bar();
     bar.value = 'abc';
     di.registerInstance('bar', bar);
-
-    di.configure({
-      abstractFactories: [
-        [new ReflectionBasedAbstractFactory(), Lifecycle.SINGLETON],
-      ],
-    });
 
     const obj = di.get(Baz);
 
@@ -40,13 +29,13 @@ describe('Decorators', () => {
     expect(obj.bar.value).toEqual('abc');
   });
 
-  it('Test @injection transient', () => {
-    @injection(Lifecycle.TRANSIENT)
+  it('Test @injectable transient', () => {
+    @injectable(Lifecycle.TRANSIENT)
     class Bar {
       constructor(public value: string = 'bar') {}
     }
 
-    @injection(Lifecycle.TRANSIENT)
+    @injectable(Lifecycle.TRANSIENT)
     class Foo {
       public bar: Bar;
       public value = new RandomValue();

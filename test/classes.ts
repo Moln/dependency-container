@@ -1,20 +1,20 @@
-import { inject, injection } from '../src';
+import { inject, injectable } from '../src';
 
 export class RandomValue {
   public value = Math.random();
 }
 
-@injection()
+@injectable()
 export class Bar {
   public value: string = 'bar';
 }
 
-@injection()
+@injectable()
 export class Foo {
   constructor(public myBar: Bar) {}
 }
 
-@injection()
+@injectable()
 export class Baz {
   public bar: Bar;
   constructor(@inject('bar') myBar: Bar) {

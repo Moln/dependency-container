@@ -7,8 +7,13 @@ import {
   AbstractFactoryInterface,
   FactoryFunction,
 } from './types';
-import { matchMiddleware } from './';
-import { isNormalToken, reflectionFactory, reflectionFactoryFrom } from './';
+import {
+  isNormalToken,
+  reflectionFactory,
+  reflectionFactoryFrom,
+  matchMiddleware,
+  ReflectionBasedAbstractFactory,
+} from './';
 import { Constructor } from 'internal';
 
 const noop = () => {
@@ -233,4 +238,13 @@ export default class DependencyContainer
 
     return null;
   }
+}
+
+export function createContainer() {
+  const container = new DependencyContainer();
+  container.configure({
+    abstractFactories: [[new ReflectionBasedAbstractFactory(), SINGLETON]],
+  });
+
+  return container;
 }

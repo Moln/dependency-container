@@ -10,7 +10,7 @@ import {
  *
  * @return {Function} The class decorator
  */
-export function injection<T>(
+export function injectable<T>(
   lifecycle: Lifecycle = Lifecycle.SINGLETON
 ): (target: Constructor<T>) => void {
   if (process.env.NODE_ENV !== 'production') {

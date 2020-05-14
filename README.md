@@ -11,10 +11,10 @@ constructor injection.
 - [Installation](#installation)
 - [API](#api)
   - [Decorators](#decorators)
-    - [injection()](#injection)
+    - [injectable()](#injectable)
     - [inject()](#inject)
   - [DependencyContainer](#dependencycontainer)
-    - [Injection Token](#injection-token)
+    - [InjectionToken](#injectabletoken)
     - [Provider](#provider)
     - [Registers](#registers)
     - [Factories](#factories)
@@ -65,7 +65,7 @@ import "reflect-metadata";
 
 ### Decorators
 
-#### injection()
+#### injectable()
 
 Class decorator factory that allows the class' dependencies to be injected at runtime. 
 
@@ -73,18 +73,15 @@ Class decorator factory that allows the class' dependencies to be injected at ru
 
 ```typescript
 // foo.ts
-import {injection} from "@moln/dependency-container";
+import {injectable, createContainer} from "@moln/dependency-container";
 
-@injection()
+@injectable()
 export class Foo {
   constructor(private database: Database) {}
 }
 
 // some other file
-const container = new DependencyContainer();
-container.configure({
-  abstractFactories: [[new ReflectionBasedAbstractFactory()]],
-});
+const container = createContainer();
 
 const instance = container.get(Foo);
 ```
@@ -97,9 +94,9 @@ Parameter decorator factory that allows for interface and other non-class inform
 
 ```typescript
 // foo.ts
-import {injection} from "@moln/dependency-container";
+import {injectable} from "@moln/dependency-container";
 
-@injection()
+@injectable()
 class Foo {
   constructor(@inject('bar') private bar: Bar) {}
 }
@@ -109,10 +106,7 @@ class Bar {
 }
 
 // some other file
-const container = new DependencyContainer();
-container.configure({
-  abstractFactories: [[new ReflectionBasedAbstractFactory()]],
-});
+const container = createContainer();
 
 container.register('bar', () => new Bar('abc'));
 
@@ -121,7 +115,7 @@ const instance = container.get(Foo);
 
 ### DependencyContainer
 
-#### Injection Token
+#### InjectionToken
 
 A token may be either a string, a symbol or a class constructor.
 
@@ -189,12 +183,9 @@ container.get(Foo) === container.get('aliasFoo')
 Register (default) singleton reflection abstract factory.
 
 ```typescript
-const container = new DependencyContainer();
-container.configure({
-  abstractFactories: [[new ReflectionBasedAbstractFactory()]],
-});
+const container = createContainer()
 
-@injection()
+@injectable()
 class Foo {
   constructor(private bar: Bar) {}
 }
@@ -214,7 +205,7 @@ container.configure({
   abstractFactories: [[new ReflectionBasedAbstractFactory(), Lifecycle.TRANSIENT]],
 });
 
-@injection()
+@injectable()
 class Foo {
   constructor(private bar: Bar) {}
 }
