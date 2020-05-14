@@ -1,7 +1,6 @@
 {
   "name": "@moln/dependency-container",
   "description": "A lightweight dependency injection container for TypeScript/JavaScript for constructor injection.",
-  "repository": "git@github.com:Moln/dependency-container.git",
   "author": "moln.xie@gmail.com",
   "version": "1.0.0",
   "license": "MIT",
@@ -54,5 +53,13 @@
     "inversion",
     "decorators",
     "abstract factory"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Moln/dependency-container.git"
+  },
+  "homepage": "https://github.com/Moln/dependency-container",
+  "bugs": {
+    "url": "https://github.com/Moln/dependency-container/issues"
+  }
 }
