@@ -1,15 +1,19 @@
-import DependencyContainer, { ReflectionBasedAbstractFactory } from '../src';
-import RandomValueSpec from './RandomValue';
+import DependencyContainer, {
+  aliasFactory,
+  Lifecycle,
+  ReflectionBasedAbstractFactory,
+} from '../src';
+import { RandomValue } from './classes';
 
-describe('ReflectionBasedAbstractFactory', () => {
+describe('Factories', () => {
   it('Test call', () => {
     const abstractFactory = new ReflectionBasedAbstractFactory();
 
     const di = new DependencyContainer();
 
-    expect(abstractFactory.canCreate(di, RandomValueSpec)).toBeTruthy();
-    expect(abstractFactory.factory(di, RandomValueSpec)).toBeInstanceOf(
-      RandomValueSpec
+    expect(abstractFactory.canCreate(di, RandomValue)).toBeTruthy();
+    expect(abstractFactory.factory(di, RandomValue)).toBeInstanceOf(
+      RandomValue
     );
 
     expect(abstractFactory.canCreate(di, 'string')).toBeFalsy();
@@ -21,13 +25,13 @@ describe('ReflectionBasedAbstractFactory', () => {
 
     const di = new DependencyContainer();
     di.configure({
-      abstractFactories: [[abstractFactory, true]],
+      abstractFactories: [[abstractFactory, Lifecycle.SINGLETON]],
     });
 
-    const result = di.get(RandomValueSpec);
-    const result2 = di.get(RandomValueSpec);
+    const result = di.get(RandomValue);
+    const result2 = di.get(RandomValue);
 
-    expect(result).toBeInstanceOf(RandomValueSpec);
+    expect(result).toBeInstanceOf(RandomValue);
     expect(result).toEqual(result2);
   });
 
@@ -36,14 +40,25 @@ describe('ReflectionBasedAbstractFactory', () => {
 
     const di = new DependencyContainer();
     di.configure({
-      abstractFactories: [[abstractFactory, false]],
+      abstractFactories: [[abstractFactory, Lifecycle.TRANSIENT]],
     });
 
-    const result = di.get(RandomValueSpec);
-    const result2 = di.get(RandomValueSpec);
+    const result = di.get(RandomValue);
+    const result2 = di.get(RandomValue);
 
-    expect(result).toBeInstanceOf(RandomValueSpec);
-    expect(result2).toBeInstanceOf(RandomValueSpec);
+    expect(result).toBeInstanceOf(RandomValue);
+    expect(result2).toBeInstanceOf(RandomValue);
     expect(result).not.toEqual(result2);
+  });
+
+  it('should alias name', function() {
+    const di = new DependencyContainer();
+    di.registerSingleton(RandomValue);
+    di.register('random-alias', {
+      factory: aliasFactory(RandomValue),
+      lifecycle: Lifecycle.SINGLETON,
+    });
+
+    expect(di.get(RandomValue)).toStrictEqual(di.get('random-alias'));
   });
 });

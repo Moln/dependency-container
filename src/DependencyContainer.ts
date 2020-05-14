@@ -6,20 +6,26 @@ import {
   DependencyConfigInterface,
   DependencyContainerInterface,
   AbstractFactoryInterface,
+  FactoryFunction,
 } from './types';
-import { matchedMiddleware } from './';
+import { matchMiddleware } from './';
 import { isNormalToken, reflectionFactory, reflectionFactoryFrom } from './';
 
 const noop = () => {
   /* noop */
 };
 
+export enum Lifecycle {
+  SINGLETON,
+  TRANSIENT,
+}
+
 export default class DependencyContainer
   implements DependencyContainerInterface {
   private registry = new Map<InjectionToken, Provider>();
 
   private abstractFactories: Array<
-    [AbstractFactoryInterface<any>, boolean]
+    [AbstractFactoryInterface<any>, Lifecycle]
   > = [];
 
   private middlewares: Array<ServiceMiddleware<any>> = [];
@@ -39,13 +45,19 @@ export default class DependencyContainer
 
     if (config.singletonFactories) {
       config.singletonFactories.forEach((value, token) => {
-        this.register(token, { factory: value, singleton: true });
+        this.register(token, {
+          factory: value,
+          lifecycle: Lifecycle.SINGLETON,
+        });
       });
     }
 
     if (config.transientFactories) {
       config.transientFactories.forEach((value, token) => {
-        this.register(token, { factory: value, singleton: false });
+        this.register(token, {
+          factory: value,
+          lifecycle: Lifecycle.TRANSIENT,
+        });
       });
     }
 
@@ -57,12 +69,12 @@ export default class DependencyContainer
 
     if (config.activationMiddlewares) {
       config.activationMiddlewares.forEach((middlewares, token) => {
-        this.pipe(matchedMiddleware(token, middlewares));
+        this.use(matchMiddleware(token, middlewares));
       });
     }
   }
 
-  public pipe<T>(middleware: ServiceMiddleware<T>): this {
+  public use<T>(middleware: ServiceMiddleware<T>): this {
     this.middlewares.push(middleware);
     return this;
   }
@@ -71,12 +83,19 @@ export default class DependencyContainer
    * Register a dependency provider.
    *
    * @param token {InjectionToken<T>}
-   * @param provider {Provider} The dependency provider
+   * @param provider {Provider|FactoryFunction<T>} The dependency provider
    */
   public register<T>(
     token: InjectionToken<T>,
-    provider: Provider
+    provider: Provider | FactoryFunction<T>
   ): DependencyContainerInterface {
+    if (typeof provider == 'function') {
+      provider = {
+        factory: provider,
+        lifecycle: Lifecycle.SINGLETON,
+      };
+    }
+
     this.registry.set(token, provider);
 
     return this;
@@ -88,7 +107,7 @@ export default class DependencyContainer
   ): DependencyContainerInterface {
     return this.register(token, {
       factory: noop,
-      singleton: true,
+      lifecycle: Lifecycle.SINGLETON,
       instance,
     });
   }
@@ -108,14 +127,17 @@ export default class DependencyContainer
       if (to) {
         return this.register<T>(from, {
           factory: reflectionFactoryFrom(to),
-          singleton: true,
+          lifecycle: Lifecycle.SINGLETON,
         });
       } else {
         throw new Error('Invalid argument "to"');
       }
     }
 
-    return this.register(from, { factory: reflectionFactory, singleton: true });
+    return this.register(from, {
+      factory: reflectionFactory,
+      lifecycle: Lifecycle.SINGLETON,
+    });
   }
 
   /**
@@ -129,7 +151,7 @@ export default class DependencyContainer
 
     if (!provider) {
       const findOut = this.abstractFactories.some(
-        ([abstractFactory, singleton]) => {
+        ([abstractFactory, lifecycle]) => {
           const instance = abstractFactory.canCreate(this, token);
 
           if (!instance) {
@@ -138,7 +160,7 @@ export default class DependencyContainer
 
           this.register(token, {
             factory: abstractFactory.factory,
-            singleton,
+            lifecycle,
           });
 
           return true;
@@ -154,7 +176,7 @@ export default class DependencyContainer
       return this.get(token);
     }
 
-    if (provider.singleton && provider.instance) {
+    if (provider.lifecycle === Lifecycle.SINGLETON && provider.instance) {
       return provider.instance;
     }
 
@@ -167,7 +189,7 @@ export default class DependencyContainer
 
     const result = call();
 
-    if (provider.singleton) {
+    if (provider.lifecycle === Lifecycle.SINGLETON) {
       provider.instance = result;
     }
 
@@ -180,7 +202,10 @@ export default class DependencyContainer
    * @return {boolean}
    */
   public has<T>(token: InjectionToken<T>): boolean {
-    return this.registry.has(token);
+    return (
+      this.registry.has(token) ||
+      ((this.parent || false) && this.parent.has(token))
+    );
   }
 
   /**
@@ -188,7 +213,6 @@ export default class DependencyContainer
    */
   public reset(): void {
     this.registry.clear();
-    this.abstractFactories = [];
   }
 
   public createChildContainer(): DependencyContainerInterface {
@@ -196,7 +220,7 @@ export default class DependencyContainer
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Provider<T> | null {
-    if (this.has(token)) {
+    if (this.registry.has(token)) {
       return this.registry.get(token)!;
     }
 

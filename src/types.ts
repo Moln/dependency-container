@@ -1,3 +1,5 @@
+import { Lifecycle } from './DependencyContainer';
+
 export type InjectionToken<T = any> = Constructor<T> | string | symbol;
 
 export type FactoryFunction<T> = (
@@ -22,7 +24,7 @@ export interface Dictionary<T> {
 
 export interface Provider<T = any> {
   factory: FactoryFunction<T>;
-  singleton: boolean;
+  lifecycle: Lifecycle;
   instance?: T;
 }
 
@@ -55,7 +57,7 @@ export interface DependencyContainerInterface {
 
   createChildContainer(): DependencyContainerInterface;
 
-  pipe<T>(middleware: ServiceMiddleware<T>): void;
+  use<T>(middleware: ServiceMiddleware<T>): void;
 }
 
 export type ServiceMiddleware<T> = (
@@ -64,15 +66,11 @@ export type ServiceMiddleware<T> = (
   next: () => T
 ) => T;
 
-export type ServiceMiddlewares = {
-  [key in string | symbol]: Array<ServiceMiddleware<any>>;
-};
-
 export interface DependencyConfigInterface {
   services?: Map<InjectionToken, any>;
   invokables?: Array<Constructor<any>>;
   singletonFactories?: Map<InjectionToken, FactoryFunction<any>>;
   transientFactories?: Map<InjectionToken, FactoryFunction<any>>;
-  abstractFactories?: Array<[AbstractFactoryInterface, boolean]>;
+  abstractFactories?: Array<[AbstractFactoryInterface, Lifecycle]>;
   activationMiddlewares?: Map<InjectionToken, Array<ServiceMiddleware<any>>>;
 }

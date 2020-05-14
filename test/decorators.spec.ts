@@ -1,27 +1,19 @@
 import DependencyContainer, {
+  Lifecycle,
   inject,
   injection,
-  METADATA,
   ReflectionBasedAbstractFactory,
 } from '../src';
-import RandomValue from './RandomValue';
+import { Bar, Baz, Foo, RandomValue } from './classes';
 
 describe('Decorators', () => {
   it('Test @injection singleton', () => {
-    @injection()
-    class Bar {
-      public value: string = 'bar';
-    }
-
-    @injection()
-    class Foo {
-      constructor(public myBar: Bar) {}
-    }
-
     const di = new DependencyContainer();
 
     di.configure({
-      abstractFactories: [[new ReflectionBasedAbstractFactory(), true]],
+      abstractFactories: [
+        [new ReflectionBasedAbstractFactory(), Lifecycle.SINGLETON],
+      ],
     });
 
     const obj = di.get(Foo);
@@ -30,19 +22,6 @@ describe('Decorators', () => {
   });
 
   it('Test @inject', () => {
-    @injection()
-    class Bar {
-      public value: string = 'bar';
-    }
-
-    @injection()
-    class Foo {
-      public bar: Bar;
-      constructor(@inject('bar') myBar: Bar) {
-        this.bar = myBar;
-      }
-    }
-
     const di = new DependencyContainer();
 
     const bar = new Bar();
@@ -50,22 +29,24 @@ describe('Decorators', () => {
     di.registerInstance('bar', bar);
 
     di.configure({
-      abstractFactories: [[new ReflectionBasedAbstractFactory(), true]],
+      abstractFactories: [
+        [new ReflectionBasedAbstractFactory(), Lifecycle.SINGLETON],
+      ],
     });
 
-    const obj = di.get(Foo);
+    const obj = di.get(Baz);
 
-    expect(obj).toBeInstanceOf(Foo);
+    expect(obj).toBeInstanceOf(Baz);
     expect(obj.bar.value).toEqual('abc');
   });
 
   it('Test @injection transient', () => {
-    @injection(false)
+    @injection(Lifecycle.TRANSIENT)
     class Bar {
-      public value: string = 'bar';
+      constructor(public value: string = 'bar') {}
     }
 
-    @injection(false)
+    @injection(Lifecycle.TRANSIENT)
     class Foo {
       public bar: Bar;
       public value = new RandomValue();
@@ -76,13 +57,15 @@ describe('Decorators', () => {
 
     const di = new DependencyContainer();
 
-    const bar = new Bar();
-    bar.value = 'abc';
+    const bar = new Bar('abc');
     di.registerInstance('bar', bar);
 
     di.configure({
       abstractFactories: [
-        [new ReflectionBasedAbstractFactory(METADATA.TRANSIENT), false],
+        [
+          new ReflectionBasedAbstractFactory(Lifecycle.TRANSIENT),
+          Lifecycle.TRANSIENT,
+        ],
       ],
     });
 

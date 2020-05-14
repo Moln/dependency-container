@@ -6,47 +6,41 @@ import {
   Dictionary,
   AbstractFactoryInterface,
 } from './types';
-import { METADATA } from './';
-
-export function isNormalToken(
-  token?: InjectionToken<any>
-): token is string | symbol {
-  return typeof token === 'string' || typeof token === 'symbol';
-}
+import { isNormalToken, METADATA } from './';
+import { Lifecycle } from 'DependencyContainer';
 
 export function aliasFactory<T>(token: InjectionToken<T>): FactoryFunction<T> {
   return container => container.get(token);
 }
 
-export const reflectionFactory: FactoryFunction<any> = (
+export const reflectionFactory: FactoryFunction<any> = <T>(
   container: DependencyContainerInterface,
-  token: InjectionToken<any>
+  token: InjectionToken<T>
 ) => {
-  if (typeof token !== 'function') {
+  if (isNormalToken(token)) {
     throw new Error('Invalid token');
   }
 
-  return reflectionFactoryFrom(token)(container, token);
+  if (token.length === 0) {
+    return new token();
+  }
+
+  const paramInfo = getParamInfo(token);
+
+  if (!paramInfo || paramInfo.length === 0) {
+    throw new Error(`TypeInfo not known for ${token}`);
+  }
+
+  const params = paramInfo.map(param => container.get(param));
+
+  return new token(...params);
 };
 
 export function reflectionFactoryFrom<T>(
   ctor: Constructor<T>
 ): FactoryFunction<T> {
-  return (container: DependencyContainerInterface) => {
-    if (ctor.length === 0) {
-      return new ctor();
-    }
-
-    const paramInfo = getParamInfo(ctor);
-
-    if (!paramInfo || paramInfo.length === 0) {
-      throw new Error(`TypeInfo not known for ${ctor}`);
-    }
-
-    const params = paramInfo.map(param => container.get(param));
-
-    return new ctor(...params);
-  };
+  return (container: DependencyContainerInterface) =>
+    reflectionFactory(container, ctor);
 }
 
 export function getParamInfo(target: Constructor<any>): any[] {
@@ -63,10 +57,10 @@ export function getParamInfo(target: Constructor<any>): any[] {
 
 export class ReflectionBasedAbstractFactory<T = any>
   implements AbstractFactoryInterface<T> {
-  private readonly metaKey: string | undefined;
+  private readonly lifecycleScope: Lifecycle | undefined;
 
-  constructor(metaKey?: string) {
-    this.metaKey = metaKey;
+  constructor(lifecycleScope?: Lifecycle) {
+    this.lifecycleScope = lifecycleScope;
   }
 
   public canCreate(
@@ -77,17 +71,15 @@ export class ReflectionBasedAbstractFactory<T = any>
       return false;
     }
 
-    if (!this.metaKey) {
+    if (this.lifecycleScope === undefined) {
       return true;
     } else {
-      return Reflect.getOwnMetadata(this.metaKey, token) === true;
+      return (
+        Reflect.getOwnMetadata(METADATA.LIFECYCLE, token) ===
+        this.lifecycleScope
+      );
     }
   }
 
-  public factory(
-    container: DependencyContainerInterface,
-    token: InjectionToken<T>
-  ): T {
-    return reflectionFactoryFrom(token as Constructor<T>)(container, token);
-  }
+  public factory = reflectionFactory;
 }
