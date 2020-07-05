@@ -6,7 +6,7 @@ import {
 } from './types';
 import { isNormalToken } from './';
 import { METADATA_LIFECYCLE, getParamInfo, Constructor } from './internal';
-import { Lifecycle } from 'DependencyContainer';
+import { Lifecycle } from './DependencyContainer';
 
 export function aliasFactory<T>(token: InjectionToken<T>): FactoryFunction<T> {
   return container => container.get(token);

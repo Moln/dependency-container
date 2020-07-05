@@ -1,4 +1,4 @@
-import { InjectionToken } from 'types';
+import { InjectionToken } from './types';
 
 export const METADATA_DESIGN_PARAM_TYPES = 'design:paramtypes';
 export const METADATA_PARAM_TYPES = 'dependency:paramtypes';

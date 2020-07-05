@@ -14,7 +14,7 @@ import {
   matchMiddleware,
   ReflectionBasedAbstractFactory,
 } from './';
-import { Constructor } from 'internal';
+import { Constructor } from './internal';
 
 const noop = () => {
   /* noop */
