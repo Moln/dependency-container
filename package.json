@@ -2,7 +2,7 @@
   "name": "@moln/dependency-container",
   "description": "A lightweight dependency injection container for TypeScript/JavaScript for constructor injection.",
   "author": "moln.xie@gmail.com",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
