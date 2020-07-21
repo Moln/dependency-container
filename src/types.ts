@@ -25,7 +25,7 @@ export interface AbstractFactoryInterface<T = any> {
 export interface DependencyContainerInterface {
   register<T>(
     token: InjectionToken<T>,
-    provider: Provider
+    provider: Provider | FactoryFunction<T>
   ): DependencyContainerInterface;
 
   registerSingleton<T>(
